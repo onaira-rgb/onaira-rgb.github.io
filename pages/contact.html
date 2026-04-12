@@ -77,29 +77,34 @@
           <li>Civil infrastructure &amp; project management</li>
           <li>Cost estimation &amp; quantity take-off</li>
           <li>Federal grant writing (FTA / FHWA)</li>
+          <li>Construction management</li>
         </ul>
       </div>
 
       <div class="contact-form-wrap fade-up">
-        <form class="contact-form" id="contactForm">
+        <form class="contact-form" id="contactForm" novalidate>
+
           <div class="form-row">
             <div class="form-group">
               <label for="fname">First Name *</label>
-              <input type="text" id="fname" name="firstName" required placeholder="Jane" />
+              <input type="text" id="fname" name="firstName" required placeholder="Jane" autocomplete="given-name" />
             </div>
             <div class="form-group">
               <label for="lname">Last Name *</label>
-              <input type="text" id="lname" name="lastName" required placeholder="Smith" />
+              <input type="text" id="lname" name="lastName" required placeholder="Smith" autocomplete="family-name" />
             </div>
           </div>
+
           <div class="form-group">
             <label for="email">Email Address *</label>
-            <input type="email" id="email" name="email" required placeholder="jane@organization.com" />
+            <input type="email" id="email" name="email" required placeholder="jane@organization.com" autocomplete="email" />
           </div>
+
           <div class="form-group">
             <label for="org">Organization</label>
-            <input type="text" id="org" name="organization" placeholder="City of Boston, MBTA, etc." />
+            <input type="text" id="org" name="organization" placeholder="City of Boston, MBTA, etc." autocomplete="organization" />
           </div>
+
           <div class="form-group">
             <label for="service">Service Area of Interest</label>
             <select id="service" name="service">
@@ -110,19 +115,28 @@
               <option>Civil Infrastructure &amp; PM</option>
               <option>Cost Estimation &amp; QTO</option>
               <option>Federal Grant Writing</option>
+              <option>Construction Management</option>
               <option>General Inquiry / Teaming</option>
             </select>
           </div>
+
           <div class="form-group">
             <label for="message">Message *</label>
-            <textarea id="message" name="message" required rows="5" placeholder="Tell us about your project or inquiry..."></textarea>
+            <textarea id="message" name="message" required rows="5" placeholder="Tell us about your project or inquiry..." minlength="10" maxlength="5000"></textarea>
+            <span class="char-count" id="charCount">0 / 5000</span>
           </div>
 
-          <!-- Submit button — shows spinner while sending -->
+          <!-- HONEYPOT — hidden from humans, bots fill this in -->
+          <div style="position:absolute; left:-9999px; top:-9999px; opacity:0;" aria-hidden="true">
+            <label for="honeypot">Leave this empty</label>
+            <input type="text" id="honeypot" name="honeypot" tabindex="-1" autocomplete="off" />
+          </div>
+
           <button type="submit" class="btn btn-primary" id="submitBtn" style="width:100%;">
             Send Message
           </button>
           <p class="form-note" id="formNote">We typically respond within 1 business day.</p>
+
         </form>
       </div>
 
@@ -167,52 +181,102 @@
   <script src="../js/main.js"></script>
 
   <script>
-    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWgE9l1h_Bz17a57qfnTgoMFTQpQG-SIMLXW5KrJKdht49uizZ6qsA9tZaTmwFd29wHg/exec";
+    // ── Config ──────────────────────────────────────────────
+    var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLupzhY9tkZ9RyY3jODFJg9BvBvehSD9lujM9o7I1gOccSlc3VLR9gCeJW9a2HQ2KTFA/exec";
+    var SECRET_TOKEN = "ouba-ec-2025-xK9m";
+    var RATE_LIMIT_MS = 60000; // 1 submission per minute per browser session
+
+    // ── Character counter ───────────────────────────────────
+    var msgField = document.getElementById("message");
+    var charCount = document.getElementById("charCount");
+    msgField.addEventListener("input", function () {
+      var len = msgField.value.length;
+      charCount.textContent = len + " / 5000";
+      charCount.style.color = len > 4500 ? "#C49A3C" : "#9E998E";
+    });
+
+    // ── Submit handler ──────────────────────────────────────
+    var lastSubmit = 0;
 
     document.getElementById("contactForm").addEventListener("submit", function (e) {
       e.preventDefault();
 
-      const form = e.target;
-      const btn = document.getElementById("submitBtn");
-      const note = document.getElementById("formNote");
+      var form = e.target;
+      var btn = document.getElementById("submitBtn");
+      var note = document.getElementById("formNote");
 
-      // Disable button and show sending state
+      // Rate limit check
+      var now = Date.now();
+      if (now - lastSubmit < RATE_LIMIT_MS) {
+        note.innerHTML = '<span style="color:#C49A3C;">Please wait a moment before submitting again.</span>';
+        return;
+      }
+
+      // Client-side validation
+      var firstName = form.firstName.value.trim();
+      var email = form.email.value.trim();
+      var message = form.message.value.trim();
+      var honeypot = form.honeypot.value;
+
+      // Honeypot — silently reject bots
+      if (honeypot !== "") { return; }
+
+      if (!firstName || !email || !message) {
+        note.innerHTML = '<span style="color:red;">Please fill in all required fields.</span>';
+        return;
+      }
+
+      var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        note.innerHTML = '<span style="color:red;">Please enter a valid email address.</span>';
+        return;
+      }
+
+      if (message.length < 10) {
+        note.innerHTML = '<span style="color:red;">Message is too short. Please provide more detail.</span>';
+        return;
+      }
+
+      // Disable button
       btn.disabled = true;
       btn.textContent = "Sending…";
       btn.style.opacity = "0.7";
       note.textContent = "Please wait…";
 
-      const data = new FormData(form);
+      // Build form data with token
+      var data = new FormData(form);
+      data.append("token", SECRET_TOKEN);
 
       fetch(SCRIPT_URL, {
         method: "POST",
         body: data
       })
-      .then(function (response) {
-        // Show success message inside the form area
-        form.innerHTML = `
-          <div style="text-align:center; padding: 3rem 1rem;">
-            <div style="font-size:2.5rem; margin-bottom:1rem;">✓</div>
-            <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; color:#0D1B2A; margin-bottom:0.75rem;">
-              Message Sent
-            </h3>
-            <p style="color:#4A4640; font-size:0.95rem; line-height:1.7;">
-              Thank you for reaching out. We'll be in touch at <strong style="color:#C49A3C;">${data.get('email')}</strong> within one business day.
-            </p>
-          </div>
-        `;
+      .then(function (res) { return res.json(); })
+      .then(function (json) {
+        if (json.status === "success") {
+          lastSubmit = Date.now();
+          form.innerHTML = [
+            '<div style="text-align:center; padding:3rem 1rem;">',
+            '  <div style="font-size:2.5rem; margin-bottom:1rem; color:#C49A3C;">✓</div>',
+            '  <h3 style="font-family:\'Cormorant Garamond\',serif; font-size:1.8rem; color:#0D1B2A; margin-bottom:0.75rem;">Message Sent</h3>',
+            '  <p style="color:#4A4640; font-size:0.95rem; line-height:1.7;">',
+            '    Thank you for reaching out. We\'ll be in touch at',
+            '    <strong style="color:#C49A3C;">' + email + '</strong>',
+            '    within one business day.',
+            '  </p>',
+            '</div>'
+          ].join("");
+        } else {
+          throw new Error(json.status);
+        }
       })
-      .catch(function (error) {
-        // Re-enable button and show error
+      .catch(function () {
         btn.disabled = false;
         btn.textContent = "Send Message";
         btn.style.opacity = "1";
-        note.innerHTML = `
-          <span style="color:red;">
-            Something went wrong. Please email us directly at
-            <a href="mailto:info@oubaec.com" style="color:#C49A3C;">info@oubaec.com</a>
-          </span>
-        `;
+        note.innerHTML =
+          '<span style="color:red;">Something went wrong. Please email us directly at ' +
+          '<a href="mailto:info@oubaec.com" style="color:#C49A3C;">info@oubaec.com</a></span>';
       });
     });
   </script>
