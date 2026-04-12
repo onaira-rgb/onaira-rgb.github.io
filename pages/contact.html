@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact — OUBA Engineers and Consultants LLC</title>
+  <link rel="stylesheet" href="../css/style.css" />
+  <link rel="stylesheet" href="../css/pages.css" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@300;400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet" />
+</head>
+<body>
+
+  <header class="nav-wrap">
+    <nav class="nav container">
+      <a href="../index.html" class="nav-logo">
+        <span class="logo-ouba">OUBA</span>
+        <span class="logo-sub">Engineers &amp; Consultants</span>
+      </a>
+      <button class="hamburger" id="hamburger"><span></span><span></span><span></span></button>
+      <ul class="nav-links" id="navLinks">
+        <li><a href="../index.html">Home</a></li>
+        <li><a href="about.html">About</a></li>
+        <li><a href="services.html">Services</a></li>
+        <li><a href="team.html">Team</a></li>
+        <li><a href="contact.html" class="active nav-cta">Contact Us</a></li>
+      </ul>
+    </nav>
+  </header>
+
+  <section class="page-hero">
+    <div class="container page-hero-inner">
+      <span class="section-tag">Get in Touch</span>
+      <h1>Contact Us</h1>
+      <p>Ready to discuss a project? We respond within one business day.</p>
+    </div>
+  </section>
+
+  <section class="section">
+    <div class="container contact-layout">
+
+      <div class="contact-info fade-up">
+        <h2>Let's talk about your project</h2>
+        <p>Whether you're a public agency, developer, engineering firm, or non-profit — we'd love to understand your needs and explore how OUBA can help.</p>
+
+        <div class="contact-item">
+          <div class="contact-icon">✉</div>
+          <div>
+            <h5>Email</h5>
+            <a href="mailto:info@oubaec.com">info@oubaec.com</a>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">⊙</div>
+          <div>
+            <h5>Location</h5>
+            <p>Boston, Massachusetts</p>
+          </div>
+        </div>
+
+        <div class="contact-item">
+          <div class="contact-icon">◎</div>
+          <div>
+            <h5>Services Region</h5>
+            <p>United States (remote &amp; on-site)</p>
+          </div>
+        </div>
+
+        <div class="contact-divider"></div>
+        <h4>We specialize in:</h4>
+        <ul class="contact-service-list">
+          <li>Transportation planning &amp; traffic studies</li>
+          <li>Transit data analytics &amp; GIS</li>
+          <li>Environmental impact assessment</li>
+          <li>Civil infrastructure &amp; project management</li>
+          <li>Cost estimation &amp; quantity take-off</li>
+          <li>Federal grant writing (FTA / FHWA)</li>
+        </ul>
+      </div>
+
+      <div class="contact-form-wrap fade-up">
+        <form class="contact-form" id="contactForm">
+          <div class="form-row">
+            <div class="form-group">
+              <label for="fname">First Name *</label>
+              <input type="text" id="fname" name="firstName" required placeholder="Jane" />
+            </div>
+            <div class="form-group">
+              <label for="lname">Last Name *</label>
+              <input type="text" id="lname" name="lastName" required placeholder="Smith" />
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="email">Email Address *</label>
+            <input type="email" id="email" name="email" required placeholder="jane@organization.com" />
+          </div>
+          <div class="form-group">
+            <label for="org">Organization</label>
+            <input type="text" id="org" name="organization" placeholder="City of Boston, MBTA, etc." />
+          </div>
+          <div class="form-group">
+            <label for="service">Service Area of Interest</label>
+            <select id="service" name="service">
+              <option value="">Select a service...</option>
+              <option>Transportation Planning &amp; Engineering</option>
+              <option>Transit Data Analytics</option>
+              <option>Environmental Engineering</option>
+              <option>Civil Infrastructure &amp; PM</option>
+              <option>Cost Estimation &amp; QTO</option>
+              <option>Federal Grant Writing</option>
+              <option>General Inquiry / Teaming</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="message">Message *</label>
+            <textarea id="message" name="message" required rows="5" placeholder="Tell us about your project or inquiry..."></textarea>
+          </div>
+
+          <!-- Submit button — shows spinner while sending -->
+          <button type="submit" class="btn btn-primary" id="submitBtn" style="width:100%;">
+            Send Message
+          </button>
+          <p class="form-note" id="formNote">We typically respond within 1 business day.</p>
+        </form>
+      </div>
+
+    </div>
+  </section>
+
+  <footer class="footer">
+    <div class="container footer-inner">
+      <div class="footer-brand">
+        <span class="logo-ouba">OUBA</span>
+        <span class="logo-sub">Engineers &amp; Consultants LLC</span>
+        <p>Women-owned engineering and consulting firm.<br/>Boston, Massachusetts</p>
+      </div>
+      <div class="footer-links">
+        <h5>Company</h5>
+        <a href="about.html">About Us</a>
+        <a href="team.html">Our Team</a>
+        <a href="services.html">Services</a>
+        <a href="contact.html">Contact</a>
+      </div>
+      <div class="footer-links">
+        <h5>Services</h5>
+        <a href="services.html#transportation">Transportation Planning</a>
+        <a href="services.html#data">Transit Data Analytics</a>
+        <a href="services.html#environmental">Environmental Engineering</a>
+        <a href="services.html#civil">Civil Infrastructure</a>
+      </div>
+      <div class="footer-contact">
+        <h5>Contact</h5>
+        <p>Boston, Massachusetts</p>
+        <a href="mailto:info@oubaec.com">info@oubaec.com</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <div class="container">
+        <span>© 2025 OUBA Engineers and Consultants LLC. All rights reserved.</span>
+        <span>Women-Owned Business | Boston, MA</span>
+      </div>
+    </div>
+  </footer>
+
+  <script src="../js/main.js"></script>
+
+  <script>
+    const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxWgE9l1h_Bz17a57qfnTgoMFTQpQG-SIMLXW5KrJKdht49uizZ6qsA9tZaTmwFd29wHg/exec";
+
+    document.getElementById("contactForm").addEventListener("submit", function (e) {
+      e.preventDefault();
+
+      const form = e.target;
+      const btn = document.getElementById("submitBtn");
+      const note = document.getElementById("formNote");
+
+      // Disable button and show sending state
+      btn.disabled = true;
+      btn.textContent = "Sending…";
+      btn.style.opacity = "0.7";
+      note.textContent = "Please wait…";
+
+      const data = new FormData(form);
+
+      fetch(SCRIPT_URL, {
+        method: "POST",
+        body: data
+      })
+      .then(function (response) {
+        // Show success message inside the form area
+        form.innerHTML = `
+          <div style="text-align:center; padding: 3rem 1rem;">
+            <div style="font-size:2.5rem; margin-bottom:1rem;">✓</div>
+            <h3 style="font-family:'Cormorant Garamond',serif; font-size:1.8rem; color:#0D1B2A; margin-bottom:0.75rem;">
+              Message Sent
+            </h3>
+            <p style="color:#4A4640; font-size:0.95rem; line-height:1.7;">
+              Thank you for reaching out. We'll be in touch at <strong style="color:#C49A3C;">${data.get('email')}</strong> within one business day.
+            </p>
+          </div>
+        `;
+      })
+      .catch(function (error) {
+        // Re-enable button and show error
+        btn.disabled = false;
+        btn.textContent = "Send Message";
+        btn.style.opacity = "1";
+        note.innerHTML = `
+          <span style="color:red;">
+            Something went wrong. Please email us directly at
+            <a href="mailto:info@oubaec.com" style="color:#C49A3C;">info@oubaec.com</a>
+          </span>
+        `;
+      });
+    });
+  </script>
+
+</body>
+</html>
