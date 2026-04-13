@@ -87,22 +87,22 @@
           <div class="form-row">
             <div class="form-group">
               <label for="fname">First Name *</label>
-              <input type="text" id="fname" name="firstName" required placeholder="Jane" autocomplete="given-name" />
+              <input type="text" id="fname" name="firstName" required placeholder="Jane" />
             </div>
             <div class="form-group">
               <label for="lname">Last Name *</label>
-              <input type="text" id="lname" name="lastName" required placeholder="Smith" autocomplete="family-name" />
+              <input type="text" id="lname" name="lastName" required placeholder="Smith" />
             </div>
           </div>
 
           <div class="form-group">
             <label for="email">Email Address *</label>
-            <input type="email" id="email" name="email" required placeholder="jane@organization.com" autocomplete="email" />
+            <input type="email" id="email" name="email" required placeholder="jane@organization.com" />
           </div>
 
           <div class="form-group">
             <label for="org">Organization</label>
-            <input type="text" id="org" name="organization" placeholder="City of Boston, MBTA, etc." autocomplete="organization" />
+            <input type="text" id="org" name="organization" placeholder="City of Boston, MBTA, etc." />
           </div>
 
           <div class="form-group">
@@ -122,13 +122,11 @@
 
           <div class="form-group">
             <label for="message">Message *</label>
-            <textarea id="message" name="message" required rows="5" placeholder="Tell us about your project or inquiry..." minlength="10" maxlength="5000"></textarea>
+            <textarea id="message" name="message" required rows="5" placeholder="Tell us about your project..." minlength="10" maxlength="5000"></textarea>
             <span class="char-count" id="charCount">0 / 5000</span>
           </div>
 
-          <!-- HONEYPOT — hidden from humans, bots fill this -->
           <div style="position:absolute; left:-9999px; top:-9999px; opacity:0;" aria-hidden="true">
-            <label for="honeypot">Leave this empty</label>
             <input type="text" id="honeypot" name="honeypot" tabindex="-1" autocomplete="off" />
           </div>
 
@@ -157,13 +155,6 @@
         <a href="services.html">Services</a>
         <a href="contact.html">Contact</a>
       </div>
-      <div class="footer-links">
-        <h5>Services</h5>
-        <a href="services.html#transportation">Transportation Planning</a>
-        <a href="services.html#data">Transit Data Analytics</a>
-        <a href="services.html#environmental">Environmental Engineering</a>
-        <a href="services.html#civil">Civil Infrastructure</a>
-      </div>
       <div class="footer-contact">
         <h5>Contact</h5>
         <p>Boston, Massachusetts</p>
@@ -173,32 +164,25 @@
     <div class="footer-bottom">
       <div class="container">
         <span>© 2025 OUBA Engineers and Consultants LLC. All rights reserved.</span>
-        <span>Women-Owned Business | Boston, MA</span>
       </div>
     </div>
   </footer>
 
-  <script src="../js/main.js"></script>
-
   <script>
-    // ── Config ──────────────────────────────────────────
-    // IMPORTANT: Replace with your latest Apps Script deployment URL
+    // ── Configuration ───────────────────────────────────
     var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVLpPDZgY-kkeREumw4-Jp1jGooxnO8ZjihdfE6dJJlRSfbj5kg8GTKvcIMx9Qjb6fMQ/exec";
     var SECRET_TOKEN = "ouba-ec-2025-xK9m";
     var RATE_LIMIT_MS = 60000;
+    var lastSubmit = 0;
 
     // ── Character counter ───────────────────────────────
     var msgField = document.getElementById("message");
     var charCount = document.getElementById("charCount");
     msgField.addEventListener("input", function () {
-      var len = msgField.value.length;
-      charCount.textContent = len + " / 5000";
-      charCount.style.color = len > 4500 ? "#C49A3C" : "#9E998E";
+      charCount.textContent = msgField.value.length + " / 5000";
     });
 
     // ── Submit handler ──────────────────────────────────
-    var lastSubmit = 0;
-
     document.getElementById("contactForm").addEventListener("submit", function (e) {
       e.preventDefault();
 
@@ -206,87 +190,54 @@
       var btn = document.getElementById("submitBtn");
       var note = document.getElementById("formNote");
 
-      // Rate limit
-      var now = Date.now();
-      if (now - lastSubmit < RATE_LIMIT_MS) {
-        note.innerHTML = '<span style="color:#C49A3C;">Please wait a moment before submitting again.</span>';
+      if (Date.now() - lastSubmit < RATE_LIMIT_MS) {
+        note.innerHTML = '<span style="color:#C49A3C;">Please wait a moment before resubmitting.</span>';
         return;
       }
 
-      // Read values
-      var firstName = form.firstName.value.trim();
-      var lastName  = form.lastName.value.trim();
-      var email     = form.email.value.trim();
-      var org       = form.organization.value.trim();
-      var service   = form.service.value.trim();
-      var message   = form.message.value.trim();
-      var honeypot  = form.honeypot.value;
+      // Check Honeypot
+      if (form.honeypot.value !== "") return;
 
-      // Honeypot — silently drop bots
-      if (honeypot !== "") { return; }
-
-      // Validation
-      if (!firstName || !email || !message) {
-        note.innerHTML = '<span style="color:red;">Please fill in all required fields.</span>';
-        return;
-      }
-      var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        note.innerHTML = '<span style="color:red;">Please enter a valid email address.</span>';
-        return;
-      }
-      if (message.length < 10) {
-        note.innerHTML = '<span style="color:red;">Message is too short. Please provide more detail.</span>';
+      // Basic Validation
+      if (!form.firstName.value || !form.email.value || !form.message.value) {
+        note.innerHTML = '<span style="color:red;">Please fill all required fields.</span>';
         return;
       }
 
-      // Disable button
       btn.disabled = true;
-      btn.textContent = "Sending…";
-      btn.style.opacity = "0.7";
-      note.textContent = "Please wait…";
+      btn.textContent = "Sending...";
+      note.textContent = "Processing your inquiry...";
 
-      // Build URL-encoded params (avoids CORS preflight unlike FormData)
+      // Build Parameters
       var params = new URLSearchParams();
-      params.append("token",        SECRET_TOKEN);
-      params.append("firstName",    firstName);
-      params.append("lastName",     lastName);
-      params.append("email",        email);
-      params.append("organization", org);
-      params.append("service",      service);
-      params.append("message",      message);
-      params.append("honeypot",     honeypot);
+      params.append("token", SECRET_TOKEN);
+      params.append("firstName", form.firstName.value);
+      params.append("lastName", form.lastName.value);
+      params.append("email", form.email.value);
+      params.append("organization", form.organization.value);
+      params.append("service", form.service.value);
+      params.append("message", form.message.value);
+      params.append("honeypot", form.honeypot.value);
 
-      // Use no-cors mode — Google Apps Script requires this from static sites
-      // We won't get a JSON response back but the script will still execute
       fetch(SCRIPT_URL, {
-        method:  "POST",
-        mode:    "no-cors",
+        method: "POST",
+        mode: "no-cors", 
         headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body:    params.toString()
+        body: params.toString()
       })
-      .then(function () {
-        // no-cors always resolves (even on error) — show success
+      .then(function() {
         lastSubmit = Date.now();
-        form.innerHTML = [
-          '<div style="text-align:center; padding:3rem 1rem;">',
-          '  <div style="font-size:2.5rem; margin-bottom:1rem; color:#C49A3C;">✓</div>',
-          '  <h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.8rem;color:#0D1B2A;margin-bottom:0.75rem;">Message Sent</h3>',
-          '  <p style="color:#4A4640;font-size:0.95rem;line-height:1.7;">',
-          '    Thank you for reaching out. We\'ll be in touch at ',
-          '    <strong style="color:#C49A3C;">' + email + '</strong>',
-          '    within one business day.',
-          '  </p>',
-          '</div>'
-        ].join("");
+        form.innerHTML = `
+          <div style="text-align:center; padding:3rem 1rem;">
+            <div style="font-size:3rem; color:#C49A3C; margin-bottom:1rem;">✓</div>
+            <h3 style="margin-bottom:0.5rem;">Message Sent Successfully</h3>
+            <p>Thank you, ${form.firstName.value}. We will reach out to you at <strong>${form.email.value}</strong> shortly.</p>
+          </div>`;
       })
-      .catch(function () {
+      .catch(function(err) {
         btn.disabled = false;
         btn.textContent = "Send Message";
-        btn.style.opacity = "1";
-        note.innerHTML =
-          '<span style="color:red;">Something went wrong. Please email us directly at ' +
-          '<a href="mailto:info@oubaec.com" style="color:#C49A3C;">info@oubaec.com</a></span>';
+        note.innerHTML = '<span style="color:red;">Connection error. Please email info@oubaec.com directly.</span>';
       });
     });
   </script>
