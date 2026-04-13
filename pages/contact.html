@@ -126,7 +126,7 @@
             <span class="char-count" id="charCount">0 / 5000</span>
           </div>
 
-          <!-- HONEYPOT — hidden from humans, bots fill this in -->
+          <!-- HONEYPOT — hidden from humans, bots fill this -->
           <div style="position:absolute; left:-9999px; top:-9999px; opacity:0;" aria-hidden="true">
             <label for="honeypot">Leave this empty</label>
             <input type="text" id="honeypot" name="honeypot" tabindex="-1" autocomplete="off" />
@@ -181,12 +181,13 @@
   <script src="../js/main.js"></script>
 
   <script>
-    // ── Config ──────────────────────────────────────────────
-    var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbwLupzhY9tkZ9RyY3jODFJg9BvBvehSD9lujM9o7I1gOccSlc3VLR9gCeJW9a2HQ2KTFA/exec";
+    // ── Config ──────────────────────────────────────────
+    // IMPORTANT: Replace with your latest Apps Script deployment URL
+    var SCRIPT_URL = "https://script.google.com/macros/s/AKfycbzVLpPDZgY-kkeREumw4-Jp1jGooxnO8ZjihdfE6dJJlRSfbj5kg8GTKvcIMx9Qjb6fMQ/exec";
     var SECRET_TOKEN = "ouba-ec-2025-xK9m";
-    var RATE_LIMIT_MS = 60000; // 1 submission per minute per browser session
+    var RATE_LIMIT_MS = 60000;
 
-    // ── Character counter ───────────────────────────────────
+    // ── Character counter ───────────────────────────────
     var msgField = document.getElementById("message");
     var charCount = document.getElementById("charCount");
     msgField.addEventListener("input", function () {
@@ -195,7 +196,7 @@
       charCount.style.color = len > 4500 ? "#C49A3C" : "#9E998E";
     });
 
-    // ── Submit handler ──────────────────────────────────────
+    // ── Submit handler ──────────────────────────────────
     var lastSubmit = 0;
 
     document.getElementById("contactForm").addEventListener("submit", function (e) {
@@ -205,33 +206,35 @@
       var btn = document.getElementById("submitBtn");
       var note = document.getElementById("formNote");
 
-      // Rate limit check
+      // Rate limit
       var now = Date.now();
       if (now - lastSubmit < RATE_LIMIT_MS) {
         note.innerHTML = '<span style="color:#C49A3C;">Please wait a moment before submitting again.</span>';
         return;
       }
 
-      // Client-side validation
+      // Read values
       var firstName = form.firstName.value.trim();
-      var email = form.email.value.trim();
-      var message = form.message.value.trim();
-      var honeypot = form.honeypot.value;
+      var lastName  = form.lastName.value.trim();
+      var email     = form.email.value.trim();
+      var org       = form.organization.value.trim();
+      var service   = form.service.value.trim();
+      var message   = form.message.value.trim();
+      var honeypot  = form.honeypot.value;
 
-      // Honeypot — silently reject bots
+      // Honeypot — silently drop bots
       if (honeypot !== "") { return; }
 
+      // Validation
       if (!firstName || !email || !message) {
         note.innerHTML = '<span style="color:red;">Please fill in all required fields.</span>';
         return;
       }
-
       var emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
       if (!emailRegex.test(email)) {
         note.innerHTML = '<span style="color:red;">Please enter a valid email address.</span>';
         return;
       }
-
       if (message.length < 10) {
         note.innerHTML = '<span style="color:red;">Message is too short. Please provide more detail.</span>';
         return;
@@ -243,32 +246,39 @@
       btn.style.opacity = "0.7";
       note.textContent = "Please wait…";
 
-      // Build form data with token
-      var data = new FormData(form);
-      data.append("token", SECRET_TOKEN);
+      // Build URL-encoded params (avoids CORS preflight unlike FormData)
+      var params = new URLSearchParams();
+      params.append("token",        SECRET_TOKEN);
+      params.append("firstName",    firstName);
+      params.append("lastName",     lastName);
+      params.append("email",        email);
+      params.append("organization", org);
+      params.append("service",      service);
+      params.append("message",      message);
+      params.append("honeypot",     honeypot);
 
+      // Use no-cors mode — Google Apps Script requires this from static sites
+      // We won't get a JSON response back but the script will still execute
       fetch(SCRIPT_URL, {
-        method: "POST",
-        body: data
+        method:  "POST",
+        mode:    "no-cors",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body:    params.toString()
       })
-      .then(function (res) { return res.json(); })
-      .then(function (json) {
-        if (json.status === "success") {
-          lastSubmit = Date.now();
-          form.innerHTML = [
-            '<div style="text-align:center; padding:3rem 1rem;">',
-            '  <div style="font-size:2.5rem; margin-bottom:1rem; color:#C49A3C;">✓</div>',
-            '  <h3 style="font-family:\'Cormorant Garamond\',serif; font-size:1.8rem; color:#0D1B2A; margin-bottom:0.75rem;">Message Sent</h3>',
-            '  <p style="color:#4A4640; font-size:0.95rem; line-height:1.7;">',
-            '    Thank you for reaching out. We\'ll be in touch at',
-            '    <strong style="color:#C49A3C;">' + email + '</strong>',
-            '    within one business day.',
-            '  </p>',
-            '</div>'
-          ].join("");
-        } else {
-          throw new Error(json.status);
-        }
+      .then(function () {
+        // no-cors always resolves (even on error) — show success
+        lastSubmit = Date.now();
+        form.innerHTML = [
+          '<div style="text-align:center; padding:3rem 1rem;">',
+          '  <div style="font-size:2.5rem; margin-bottom:1rem; color:#C49A3C;">✓</div>',
+          '  <h3 style="font-family:\'Cormorant Garamond\',serif;font-size:1.8rem;color:#0D1B2A;margin-bottom:0.75rem;">Message Sent</h3>',
+          '  <p style="color:#4A4640;font-size:0.95rem;line-height:1.7;">',
+          '    Thank you for reaching out. We\'ll be in touch at ',
+          '    <strong style="color:#C49A3C;">' + email + '</strong>',
+          '    within one business day.',
+          '  </p>',
+          '</div>'
+        ].join("");
       })
       .catch(function () {
         btn.disabled = false;
